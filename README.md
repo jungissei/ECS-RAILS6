@@ -1,9 +1,9 @@
 # SET UP
 
 ```
-$ git clone https://github.com/s14228so/ECS-Rails6.git
-$ cd ECS-Rails6
-$ docker-compose run app rails new . --force --database=mysql --api
+$ git clone https://github.com/jungissei/ECS-RAILS6
+$ cd ECS-RAILS6
+$ docker-compose run app rails new . --force --database=mysql
 $ vi config/database.yml
 ```
 
@@ -15,9 +15,17 @@ default: &default
   encoding: utf8mb4
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: root
-  password: password #編集
-  host: db #編集
-# ...省略
+  password: <%= ENV['MYSQL_ROOT_PASSWORD'] %>
+  host: <%= ENV['MYSQL_HOST'] %>
+
+development:
+  <<: *default
+  database: app_development
+
+test:
+  <<: *default
+  database: app_test
+
 production:
   <<: *default
   database: <%= ENV['DB_DATABASE'] %>
