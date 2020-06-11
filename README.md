@@ -52,6 +52,16 @@ Rails.application.configure do
   config.hosts.clear #追加
 ```
 
+- production.rb
+```
+config.eager_load = false #true→false
+
+#ENV['RAILS_SERVE_STATIC_FILES'].present?→true
+# config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
+config.public_file_server.enabled = true
+
+```
+
 
 
 ```
@@ -60,3 +70,6 @@ $ mkdir -p tmp/sockets  (socketファイルの置き場所を確保)
 $ docker-compose up -d --build
 $ docker-compose run app rails db:create
 ```
+
+
+
