@@ -1,0 +1,81 @@
+
+
+version: 2.1
+orbs:
+  aws-ecr: circleci/aws-ecr@6.7.0
+  aws-ecs: circleci/aws-ecs@1.1.0
+  aws-cli: circleci/aws-cli@0.1.20
+
+jobs:
+  db-migrate:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
+      # - run:
+      #     name: "db create"
+      #     command: |
+      #       aws ecs run-task --region $AWS_REGION \
+      #         --cluster $ECS_ARN \
+      #         --task-definition nginx-rails-app \
+      #         --overrides '{"containerOverrides": [{"name": "rails","command": ["rails", "db:create"]}]}'
+      #     working_directory: app
+      - run:
+          name: "db migrate"
+          command: |
+            aws ecs run-task --region $AWS_REGION \
+              --cluster $ECS_ARN \
+              --task-definition nginx-rails-app \
+              --overrides '{"containerOverrides": [{"name": "rails","command": ["rails", "db:migrate"]}]}'
+          working_directory: app
+
+
+workflows:
+  nginx-deploy:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          region: AWS_REGION
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: ./docker/nginx/Dockerfile
+          repo: nginx
+          tag: "${CIRCLE_SHA1}"
+          filters:
+            branches:
+              only: master
+      - aws-ecs/deploy-service-update:
+          requires:
+            - aws-ecr/build-and-push-image
+          family: 'nginx-rails-app' # ECSのタスク定義名
+          cluster-name: '${ECS_ARN}'  #ECSのクラスターのARN
+          service-name: 'ecs-rails-service'  #サービス名
+          container-image-name-updates: "container=nginx,tag=${CIRCLE_SHA1}"
+  rails-deploy:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          region: AWS_REGION
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: ./docker/rails/Dockerfile
+          repo: rails
+          tag: "${CIRCLE_SHA1}"
+          filters:
+            branches:
+              only: master
+      - aws-ecs/deploy-service-update:
+          requires:
+            - aws-ecr/build-and-push-image
+          family: 'nginx-rails-app' # ECSのタスク定義名
+          cluster-name: '${ECS_ARN}' #ECSのクラスターのARN
+          service-name: 'ecs-rails-service' #サービス名
+          container-image-name-updates: "container=rails,tag=${CIRCLE_SHA1}"
+      - db-migrate:
+          requires:
+            - aws-ecs/deploy-service-update
