@@ -57,6 +57,6 @@ Rails.application.configure do
 ```
 $ cp docker/rails/puma.rb config/ (pumaの設定を上書き)
 $ mkdir -p tmp/sockets  (socketファイルの置き場所を確保)
-$ docker-compose up -d --build 
+$ docker-compose up -d --build
 $ docker-compose run app rails db:create
 ```
