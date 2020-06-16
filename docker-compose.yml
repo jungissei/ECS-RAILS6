@@ -14,9 +14,22 @@ services:
     tty: true
     depends_on:
       - db
-    extends:
-      file: ./docker/mysql/password.yml
-      service: password
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: "Asia/Tokyo"
+      WEB_HOST: ${WEB_HOST}
+      WEB_PROTOCOL: ${WEB_PROTOCOL}
+      MAIL_BCC: ${MAIL_BCC}
+      SMTP_ADDRESS: ${SMTP_ADDRESS}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_DOMAIN: ${SMTP_DOMAIN}
+      SMTP_USER_NAME: ${SMTP_USER_NAME}
+      SMTP_PASSWD: ${SMTP_PASSWD}
+      TWITTER_API_KEY: ${TWITTER_API_KEY}
+      TWITTER_API_SECRET_KEY: ${TWITTER_API_SECRET_KEY}
+      FACEBOOK_API_KEY: ${FACEBOOK_API_KEY}
+      FACEBOOK_API_SECRET_KEY: ${FACEBOOK_API_SECRET_KEY}
   db:
     build:
       context: .
@@ -25,9 +38,10 @@ services:
       - '3306:3306'
     volumes:
       - db_data:/var/lib/mysql
-    extends:
-      file: ./docker/mysql/password.yml
-      service: password
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: "Asia/Tokyo"
   nginx:
     build:
       context: .
