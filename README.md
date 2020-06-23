@@ -3,6 +3,7 @@
 ```
 $ git clone https://github.com/jungissei/ECS-RAILS6
 $ cd ECS-RAILS6
+$ echo .env >> .gitignore
 $ docker-compose run app rails new . --force --database=mysql
 $ vi config/database.yml
 ```
