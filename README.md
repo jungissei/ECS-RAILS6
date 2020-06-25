@@ -9,7 +9,7 @@ $ vi config/database.yml
 ```
 
 
-- daatabase.ymlの編集
+- edit daatabase.yml
 ```
 default: &default
   adapter: mysql2
@@ -72,5 +72,12 @@ $ docker-compose up -d --build
 $ docker-compose run app rails db:create
 ```
 
+- install dotenv-rails
+```
+$ echo -e "\\ngem 'dotenv-rails', groups: [:development, :test]" >> Gemfile
+$ docker-compose run app bundle install
+$ docker-compose down
+$ docker-compose up -d --build
+```
 
 
